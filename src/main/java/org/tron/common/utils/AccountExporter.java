@@ -30,6 +30,7 @@ import org.tron.protos.Protocol.AccountType;
 public class AccountExporter {
   public static final String FILE_NAME = "accounts.csv";
   public static final AtomicLong EXPORT_NUM = new AtomicLong(0);
+  public static final AtomicLong EXPORT_TIME = new AtomicLong(0);
   private static WalletOnSolidity walletOnSolidity;
 
   @Autowired
@@ -45,7 +46,7 @@ public class AccountExporter {
         exportNormal(iterable);
         exportContract(iterable);
         exportAssetIssue(iterable);
-        exportMissing(iterable);
+        // exportMissing(iterable);
       }
     });
   }
@@ -173,36 +174,36 @@ public class AccountExporter {
     }
   }
 
-  private static void exportMissing(Iterable<Entry<byte[], AccountCapsule>> iterable) {
-    AtomicLong total = new AtomicLong(0);
-    Map<String, Long> accounts = Streams.stream(iterable)
-        .filter(e -> (e.getValue().getType() != AccountType.AssetIssue) &&
-                     (e.getValue().getType() != AccountType.Contract) && 
-                     (e.getValue().getType() != AccountType.Normal))   // ?
-        .map(e -> Maps.immutableEntry(Wallet.encode58Check(e.getKey()), e.getValue().getBalance() + 
-                                                                        e.getValue().getFrozenBalance() +
-                                                                        e.getValue().getEnergyFrozenBalance() +
-                                                                        e.getValue().getDelegatedFrozenBalanceForEnergy() +
-                                                                        e.getValue().getDelegatedFrozenBalanceForBandwidth()))
-        .peek(e -> {
-          if (e.getValue() >= 0) total.getAndAdd(e.getValue());
-        })
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k1));
+  // private static void exportMissing(Iterable<Entry<byte[], AccountCapsule>> iterable) {
+  //   AtomicLong total = new AtomicLong(0);
+  //   Map<String, Long> accounts = Streams.stream(iterable)
+  //       .filter(e -> (e.getValue().getType() != AccountType.AssetIssue) &&
+  //                    (e.getValue().getType() != AccountType.Contract) && 
+  //                    (e.getValue().getType() != AccountType.Normal))   // ?
+  //       .map(e -> Maps.immutableEntry(Wallet.encode58Check(e.getKey()), e.getValue().getBalance() + 
+  //                                                                       e.getValue().getFrozenBalance() +
+  //                                                                       e.getValue().getEnergyFrozenBalance() +
+  //                                                                       e.getValue().getDelegatedFrozenBalanceForEnergy() +
+  //                                                                       e.getValue().getDelegatedFrozenBalanceForBandwidth()))
+  //       .peek(e -> {
+  //         if (e.getValue() >= 0) total.getAndAdd(e.getValue());
+  //       })
+  //       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k1));
 
-    try (CSVPrinter printer = new CSVPrinter(new FileWriter("block_" + EXPORT_NUM.get() + "_missing_" + FILE_NAME),
-        CSVFormat.EXCEL.withHeader("address", "balance"))) {
-      printer.printRecord("total", total.get());
-      accounts.forEach((k, v) -> {
-            String address = k;
-            long balance = v;
-            try {
-              printer.printRecord(address, balance);
-            } catch (Exception e1) {
-              logger.error("address {} write error.", address);
-            }
-          });
-    } catch (Exception e) {
-      logger.error("export error", e);
-    }
-  }
+  //   try (CSVPrinter printer = new CSVPrinter(new FileWriter("block_" + EXPORT_NUM.get() + "_missing_" + FILE_NAME),
+  //       CSVFormat.EXCEL.withHeader("address", "balance"))) {
+  //     printer.printRecord("total", total.get());
+  //     accounts.forEach((k, v) -> {
+  //           String address = k;
+  //           long balance = v;
+  //           try {
+  //             printer.printRecord(address, balance);
+  //           } catch (Exception e1) {
+  //             logger.error("address {} write error.", address);
+  //           }
+  //         });
+  //   } catch (Exception e) {
+  //     logger.error("export error", e);
+  //   }
+  // }
 }
