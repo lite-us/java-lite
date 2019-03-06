@@ -26,7 +26,7 @@ public class ExportAccountServlet extends HttpServlet {
       if (expectBlockNumber != "") {
         AccountExporter.EXPORT_NUM.set(Long.parseLong(expectBlockNumber));
       }
-      String expectTimestamp = request.getParameter("time_stamp");
+      String expectTimestamp = request.getParameter("timestamp");
       if (expectTimestamp != "") {
         AccountExporter.EXPORT_TIME.set(Long.parseLong(expectTimestamp));
       }
