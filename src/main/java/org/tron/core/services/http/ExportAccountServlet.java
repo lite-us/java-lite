@@ -22,12 +22,15 @@ public class ExportAccountServlet extends HttpServlet {
 
   protected void doGet(HttpServletRequest request, HttpServletResponse response) {
     try {
-      String input = request.getParameter("value");
-        AccountExporter.EXPORT_NUM.set(Long.parseLong(input));
-        response.getWriter().println("successfully!\n"
-            + "Please wait a moment and will dump the file on " + input + "\n"
-            + "Log in to this machine to get the account file\n"
-            + "Path: " + System.getProperty("user.dir") + "/block_" + input + "_accounts.csv");
+      String expectBlockNumber = request.getParameter("block_number");
+      AccountExporter.EXPORT_NUM.set(Long.parseLong(expectBlockNumber));
+      String expectTimestamp = request.getParameter("time_stamp");
+      AccountExporter.EXPORT_TIME.set(Long.parseLong(expectTimestamp));
+      response.getWriter().println("Set successfully!\n"
+          + "Please wait a moment and will dump the file on block height: " + expectBlockNumber + "\n"
+          + "or near the time stamp: " + expectTimestamp + "\n"
+          + "Log in to this machine to get the exported account files\n"
+          + "Path: " + System.getProperty("user.dir") + "/*_accounts.csv");
     } catch (Exception e) {
       logger.debug("Exception: {}", e.getMessage());
       try {
