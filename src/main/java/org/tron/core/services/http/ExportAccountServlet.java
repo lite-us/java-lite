@@ -23,9 +23,13 @@ public class ExportAccountServlet extends HttpServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response) {
     try {
       String expectBlockNumber = request.getParameter("block_number");
-      AccountExporter.EXPORT_NUM.set(Long.parseLong(expectBlockNumber));
+      if (expectBlockNumber != "") {
+        AccountExporter.EXPORT_NUM.set(Long.parseLong(expectBlockNumber));
+      }
       String expectTimestamp = request.getParameter("time_stamp");
-      AccountExporter.EXPORT_TIME.set(Long.parseLong(expectTimestamp));
+      if (expectTimestamp != "") {
+        AccountExporter.EXPORT_TIME.set(Long.parseLong(expectTimestamp));
+      }
       response.getWriter().println("Set successfully!\n"
           + "Please wait a moment and will dump the file on block height: " + expectBlockNumber + "\n"
           + "or near the time stamp: " + expectTimestamp + "\n"

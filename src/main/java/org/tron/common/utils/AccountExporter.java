@@ -41,17 +41,14 @@ public class AccountExporter {
   public static void export(BlockStore blockStore, Iterable<Entry<byte[], AccountCapsule>> iterable) {
     walletOnSolidity.futureGetWithoutTimeout(() -> {
       List<BlockCapsule> blockList = blockStore.getBlockByLatestNum(1);
-      if (CollectionUtils.isNotEmpty(blockList) && blockList.get(0).getNum() == EXPORT_NUM.get()) {
-        exportAll(iterable, EXPORT_NUM.get());
-        exportNormal(iterable, EXPORT_NUM.get());
-        exportContract(iterable, EXPORT_NUM.get());
-        exportAssetIssue(iterable, EXPORT_NUM.get());
-      } else if (CollectionUtils.isNotEmpty(blockList) && 
-        (Math.abs(blockList.get(0).getTimeStamp() - EXPORT_TIME.get()) <= 6000)) {
-          exportAll(iterable, blockList.get(0).getTimeStamp());
-          exportNormal(iterable, blockList.get(0).getTimeStamp());
-          exportContract(iterable, blockList.get(0).getTimeStamp());
-          exportAssetIssue(iterable, blockList.get(0).getTimeStamp());
+      if (CollectionUtils.isNotEmpty(blockList) && 
+            (blockList.get(0).getNum() == EXPORT_NUM.get() ||
+              Math.abs(blockList.get(0).getTimeStamp() - EXPORT_TIME.get()) <= 6000)
+         ){
+        exportAll(iterable, blockList.get(0).getNum());
+        exportNormal(iterable, blockList.get(0).getNum());
+        exportContract(iterable, blockList.get(0).getNum());
+        exportAssetIssue(iterable, blockList.get(0).getNum());
       }
     });
   }
