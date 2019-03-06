@@ -30,7 +30,7 @@ public class ExportAccountServlet extends HttpServlet {
           + "Please wait a moment and will dump the file on block height: " + expectBlockNumber + "\n"
           + "or near the time stamp: " + expectTimestamp + "\n"
           + "Log in to this machine to get the exported account files\n"
-          + "Path: " + System.getProperty("user.dir") + "/*_accounts.csv");
+          + "Path: " + System.getProperty("user.dir") + "/block_*_accounts.csv");
     } catch (Exception e) {
       logger.debug("Exception: {}", e.getMessage());
       try {

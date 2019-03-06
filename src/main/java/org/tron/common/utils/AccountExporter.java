@@ -42,16 +42,21 @@ public class AccountExporter {
     walletOnSolidity.futureGetWithoutTimeout(() -> {
       List<BlockCapsule> blockList = blockStore.getBlockByLatestNum(1);
       if (CollectionUtils.isNotEmpty(blockList) && blockList.get(0).getNum() == EXPORT_NUM.get()) {
-        exportAll(iterable);
-        exportNormal(iterable);
-        exportContract(iterable);
-        exportAssetIssue(iterable);
-        // exportMissing(iterable);
+        exportAll(iterable, EXPORT_NUM.get());
+        exportNormal(iterable, EXPORT_NUM.get());
+        exportContract(iterable, EXPORT_NUM.get());
+        exportAssetIssue(iterable, EXPORT_NUM.get());
+      } else if (CollectionUtils.isNotEmpty(blockList) && 
+        (Math.abs(blockList.get(0).getTimeStamp() - EXPORT_TIME.get()) <= 6000)) {
+          exportAll(iterable, blockList.get(0).getTimeStamp());
+          exportNormal(iterable, blockList.get(0).getTimeStamp());
+          exportContract(iterable, blockList.get(0).getTimeStamp());
+          exportAssetIssue(iterable, blockList.get(0).getTimeStamp());
       }
     });
   }
 
-  private static void exportAll(Iterable<Entry<byte[], AccountCapsule>> iterable) {
+  private static void exportAll(Iterable<Entry<byte[], AccountCapsule>> iterable, long fingerprint) {
     AtomicLong total = new AtomicLong(0);
     Map<String, Long> accounts = Streams.stream(iterable)
         .map(e -> Maps.immutableEntry(Wallet.encode58Check(e.getKey()), e.getValue().getBalance() + 
@@ -64,7 +69,7 @@ public class AccountExporter {
         })
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k1));
 
-    try (CSVPrinter printer = new CSVPrinter(new FileWriter("block_" + EXPORT_NUM.get() + "_all_" + FILE_NAME),
+    try (CSVPrinter printer = new CSVPrinter(new FileWriter("block_" + fingerprint + "_all_" + FILE_NAME),
         CSVFormat.EXCEL.withHeader("address", "balance"))) {
       printer.printRecord("total", total.get());
       accounts.forEach((k, v) -> {
@@ -81,7 +86,7 @@ public class AccountExporter {
     }
   }
 
-  private static void exportNormal(Iterable<Entry<byte[], AccountCapsule>> iterable) {
+  private static void exportNormal(Iterable<Entry<byte[], AccountCapsule>> iterable, long fingerprint) {
     AtomicLong total = new AtomicLong(0);
     Map<String, Long> accounts = Streams.stream(iterable)
         .filter(e -> e.getValue().getType() == AccountType.Normal)   // 0: Normal
@@ -95,7 +100,7 @@ public class AccountExporter {
         })
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k1));
 
-    try (CSVPrinter printer = new CSVPrinter(new FileWriter("block_" + EXPORT_NUM.get() + "_normal_" + FILE_NAME),
+    try (CSVPrinter printer = new CSVPrinter(new FileWriter("block_" + fingerprint + "_normal_" + FILE_NAME),
         CSVFormat.EXCEL.withHeader("address", "balance"))) {
       printer.printRecord("total", total.get());
       accounts.forEach((k, v) -> {
@@ -112,7 +117,7 @@ public class AccountExporter {
     }
   }
 
-  private static void exportContract(Iterable<Entry<byte[], AccountCapsule>> iterable) {
+  private static void exportContract(Iterable<Entry<byte[], AccountCapsule>> iterable, long fingerprint) {
     AtomicLong total = new AtomicLong(0);
     Map<String, Long> accounts = Streams.stream(iterable)
         .filter(e -> e.getValue().getType() == AccountType.Contract)   // 2: Contract
@@ -126,7 +131,7 @@ public class AccountExporter {
         })
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k1));
 
-    try (CSVPrinter printer = new CSVPrinter(new FileWriter("block_" + EXPORT_NUM.get() + "_contract_" + FILE_NAME),
+    try (CSVPrinter printer = new CSVPrinter(new FileWriter("block_" + fingerprint + "_contract_" + FILE_NAME),
         CSVFormat.EXCEL.withHeader("address", "balance"))) {
       printer.printRecord("total", total.get());
       accounts.forEach((k, v) -> {
@@ -143,7 +148,7 @@ public class AccountExporter {
     }
   }
 
-  private static void exportAssetIssue(Iterable<Entry<byte[], AccountCapsule>> iterable) {
+  private static void exportAssetIssue(Iterable<Entry<byte[], AccountCapsule>> iterable, long fingerprint) {
     AtomicLong total = new AtomicLong(0);
     Map<String, Long> accounts = Streams.stream(iterable)
         .filter(e -> e.getValue().getType() == AccountType.AssetIssue)   // 1: AssetIssue
@@ -157,7 +162,7 @@ public class AccountExporter {
         })
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k1, k2) -> k1));
 
-    try (CSVPrinter printer = new CSVPrinter(new FileWriter("block_" + EXPORT_NUM.get() + "_assetissue_" + FILE_NAME),
+    try (CSVPrinter printer = new CSVPrinter(new FileWriter("block_" + fingerprint + "_assetissue_" + FILE_NAME),
         CSVFormat.EXCEL.withHeader("address", "balance"))) {
       printer.printRecord("total", total.get());
       accounts.forEach((k, v) -> {
