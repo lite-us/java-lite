@@ -36,6 +36,11 @@ import org.tron.core.db.Manager;
 @Slf4j(topic = "API")
 @Component
 public class WalletOnSolidity {
+
+  private ListeningExecutorService executorService = MoreExecutors.listeningDecorator(
+          Executors.newFixedThreadPool(Args.getInstance().getSolidityThreads(),
+                  new ThreadFactoryBuilder().setNameFormat("WalletOnSolidity-%d").build()));
+
   @Autowired
   private Manager dbManager;
 
